@@ -1,7 +1,7 @@
 import csv
 import sys
 
-from util import Node, StackFrontier, QueueFrontier
+from util import Node
 from collections import deque
 
 # Maps names to a set of corresponding person_ids
@@ -87,51 +87,79 @@ def main():
 
 def shortest_path(source, target):
     """
-    Returns the shortest list of (movie_id, person_id) pairs
-    that connect the source to the target.
+    Find the shortest path between two actors in terms of shared movie connections.
 
-    If no possible path, returns None.
+    Parameters:
+    source (int): The ID of the source actor.
+    target (int): The ID of the target actor.
+
+    Returns:
+    list of tuples: A list of (movie_id, person_id) pairs representing the shortest path,
+                    or None if no path exists.
     """
-    class MyQueueFrontier():
+    class QueueFrontier:
+        """A class for managing the frontier in the search algorithm."""
+        
         def __init__(self):
-            # Use efficient data structure for query and pop
             self.frontier = deque([])
             self.states = set()
 
         def add(self, node):
+            """Add a node to the frontier."""
             self.frontier.append(node)
             self.states.add(node.state)
 
         def remove(self):
+            """Remove and return the next node from the frontier."""
             if not self.frontier:
-                raise Exception("empty frontier")
-            else:
-                node = self.frontier.popleft()
-                self.states.remove(node.state)
-                return node
+                raise EmptyFrontierException("No more nodes to explore.")
+            node = self.frontier.popleft()
+            self.states.remove(node.state)
+            return node
 
+    class EmptyFrontierException(Exception):
+        """Custom exception for empty frontier."""
+        pass
 
-    queue = MyQueueFrontier()
+    queue = QueueFrontier()
     queue.add(Node(source, None, None))
     explored_states = set()
-    while(True):
+
+    while True:
         try:
             current_node = queue.remove()
-        except Exception:
+        except EmptyFrontierException:
             return None
+
         explored_states.add(current_node.state)
-        for neighbor in neighbors_for_person(current_node.state):
-            if neighbor in explored_states or neighbor in queue.states:
+
+        for movie_id, actor_id in neighbors_for_person(current_node.state):
+            if actor_id in explored_states or actor_id in queue.states:
                 continue
-            node = Node(neighbor[1], current_node, neighbor[0])
-            if node.state == target:
-                path = []
-                while(node.parent):
-                    path.append((node.action, node.state))
-                    node = node.parent
-                path.reverse()
+
+            child_node = Node(actor_id, current_node, movie_id)
+            if child_node.state == target:
+                path = reconstruct_path(child_node)
                 return path
-            queue.add(node)
+
+            queue.add(child_node)
+
+def reconstruct_path(node):
+    """
+    Reconstruct the path from the target node to the source node.
+
+    Parameters:
+    node (Node): The target node.
+
+    Returns:
+    list of tuples: A list of (movie_id, person_id) pairs representing the path.
+    """
+    path = []
+    while node.parent:
+        path.append((node.action, node.state))
+        node = node.parent
+    path.reverse()
+    return path
 
 
 def person_id_for_name(name):
