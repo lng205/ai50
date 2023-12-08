@@ -1,7 +1,6 @@
 import csv
 import sys
 
-from util import Node
 from collections import deque
 
 # Maps names to a set of corresponding person_ids
@@ -87,7 +86,8 @@ def main():
 
 def shortest_path(source, target):
     """
-    Find the shortest path between two actors in terms of shared movie connections.
+    Find the shortest path between two actors in terms of shared movie connections. 
+    Use set and double ended queue to improve efficiency
 
     Parameters:
     source (int): The ID of the source actor.
@@ -97,6 +97,12 @@ def shortest_path(source, target):
     list of tuples: A list of (movie_id, person_id) pairs representing the shortest path,
                     or None if no path exists.
     """
+    class Node():
+        def __init__(self, state, parent, action):
+            self.state = state
+            self.parent = parent
+            self.action = action
+
     class QueueFrontier:
         """A class for managing the frontier in the search algorithm."""
         
