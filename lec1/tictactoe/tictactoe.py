@@ -106,4 +106,32 @@ def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    raise NotImplementedError
+    def best(board, action) -> int:
+        """Get the best score after an action"""
+        board = result(board, action)
+        if terminal(board):
+            return utility(board)
+        if player(board) == X:
+            current_best = -1
+            for act in actions(board):
+                score = best(board, act)
+                if score == 1:
+                    return 1
+                elif score > current_best:
+                    current_best = score
+        else:
+            current_best = 1
+            for act in actions(board):
+                score = best(board, act)
+                if score == -1:
+                    return -1
+                elif score < current_best:
+                    current_best = score
+        return current_best
+
+
+    scores = {act: best(board, act) for act in actions(board)}
+    if player(board) == X:
+        return max(scores, key=scores.get)
+    else:
+        return min(scores, key=scores.get)
