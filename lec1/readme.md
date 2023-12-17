@@ -35,9 +35,13 @@
 
 - 对更复杂的游戏，比如象棋，搜索到终盘的计算量过大，只能搜索一个有限的深度。此时需要一个评估算法，估计某种棋盘状态下玩家的得分。
 
+- Go作为棋类游戏，使深度学习名声大噪。
+
 ## ProbSet 1
 
 - degrees搜索通过演员-电影-演员的方式连接好莱坞的不同演员。这是一个计算量较大的搜索应用。参考课程给出的设计思路，使用字典存储图，用Node和Frontier类分别存储节点和前线节点。如果直接使用类和列表进行递归，程序用几分钟只能搜索数百步，而整个表有超过十万名演员，程序的内存占用和计算量都需要优化。优化的细节包括：
     1. 确保已经检查过的节点不会再被加入frontier。
     2. 使用集合存储已经检查过的节点，提高检索效率。
     3. 使用deque这样的双向链表结构，相比占用一块连续内存的list结构，双向链表队列能更高效地删除队列首个元素。
+
+- Minimax, and Alpha-Beta pruning: Alpha is the best score the maximizer can currently achieve, and Beta is the best score the minimizer can currently achieve. Alpha and Beta are passed in from the current node's parent. If Alpha is greater than Beta, this branch can be cut off.

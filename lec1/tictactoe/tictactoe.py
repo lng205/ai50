@@ -102,36 +102,44 @@ def utility(board):
     score = {X:1, O:-1, None: 0}
     return score[winner(board)]
 
+
 def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    def best(board, action) -> int:
-        """Get the best score after an action"""
-        board = result(board, action)
+    def best(board, alpha, beta):
+        """
+        Recursively find the best score that can be achieved from the given board state.
+
+        This function is a helper for the minimax algorithm. It applies alpha-beta pruning to improve efficiency.
+
+        Parameters:
+        board (list of list of str): The current state of the game board.
+        alpha (float): The best score that the maximizer can guarantee at current or higher levels.
+        beta (float): The best score that the minimizer can guarantee at current or higher levels.
+
+        Returns:
+        int: The best score that can be achieved from the given board state.
+        """ 
+
         if terminal(board):
             return utility(board)
-        if player(board) == X:
-            current_best = -1
-            for act in actions(board):
-                score = best(board, act)
-                if score == 1:
-                    return 1
-                elif score > current_best:
-                    current_best = score
-        else:
-            current_best = 1
-            for act in actions(board):
-                score = best(board, act)
-                if score == -1:
-                    return -1
-                elif score < current_best:
-                    current_best = score
-        return current_best
+        player_is_X = player(board) == X
+        best_score = -math.inf if player_is_X else math.inf
+
+        for action in actions(board):
+            current_score = best(result(board, action), alpha, beta)
+            if player_is_X:
+                best_score = max(best_score, current_score)
+                alpha = max(alpha, best_score)
+            else:
+                best_score = min(best_score, current_score)
+                beta = min(beta, best_score)
+            if beta <= alpha:
+                break
+        return best_score
 
 
-    scores = {act: best(board, act) for act in actions(board)}
-    if player(board) == X:
-        return max(scores, key=scores.get)
-    else:
-        return min(scores, key=scores.get)
+    alpha, beta = -math.inf, math.inf
+    scores = {action: best(result(board, action), alpha, beta) for action in actions(board)}
+    return max(scores, key=scores.get) if player(board) == X else min(scores, key=scores.get)
